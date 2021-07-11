@@ -326,6 +326,7 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
             placeholder: "Legg til aksjene du vil følge...",
             getValue: "longname",
             requestDelay: 100,
+            listLocation: "stock",
             template: {
               type: "custom",
               method: function(value, item) {
