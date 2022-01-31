@@ -1,15 +1,15 @@
 module Jobs
-  class UpdateTekindex < Jobs::Scheduled
+  class UpdateTekindex < ::Jobs::Scheduled
 
   	include Sidekiq::Worker
 
     every 12.hours
 
     def execute(args)
-	    
-      
+
+
     	  # find all stocks for tekindex
-          
+
         @tickers = []
         long_string_of_all_favorited_tickers = ""
 
@@ -17,11 +17,11 @@ module Jobs
      	  puts "Tekindex: Finding all favorited stocks by active users"
 
         User.where("last_seen_at > ?", 4.weeks.ago).each do |user|
-	  	
+
   		  	puts "finding favorites for user id: #{user.id}"
-  		  	
+
   		  	unless user.custom_fields["favorite_stocks"].nil? || user.custom_fields["favorite_stocks"].empty?
-  		  		
+
     		  	users_favorite_stocks = user.custom_fields["favorite_stocks"].split(',')
     				unless users_favorite_stocks.nil?
               long_string_of_all_favorited_tickers = long_string_of_all_favorited_tickers + users_favorite_stocks.to_s.downcase
@@ -34,21 +34,21 @@ module Jobs
     				@tickers.concat users_favorite_stocks
 
     			end
-  		  	
+
   		  end
 
         # remove duplicates
         @tickers = @tickers.uniq
 	@tickers = @tickers.flatten
-	    
+
         # sort alphabetically
 
         @tickers = @tickers.sort_by { |ticker| ticker.downcase }
         @tickers.map!(&:downcase)
-        
+
         # remove duplicates
         @tickers = @tickers.uniq
-        
+
         puts @tickers
 
 

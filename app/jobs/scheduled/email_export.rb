@@ -1,5 +1,5 @@
 module Jobs
-  class EmailExport < Jobs::Scheduled
+  class EmailExport < ::Jobs::Scheduled
 
   	include Sidekiq::Worker
 
@@ -8,19 +8,19 @@ module Jobs
     every 1.hour
 
     def execute(args)
-        
+
         client = Drip::Client.new do |c|
           c.api_key = "eqwaxhhcryfcxxdyqwhu"
           c.account_id = "9675646"
         end
-        
+
 	group = Group.find_by("lower(name) = ?", "insider")
 
-	    
+
         puts "Finding all users"
 
         users_all = User.order(id: :desc).find_in_batches(batch_size: 1000) do |users| # Drip has 1000 element limit in batches
-		
+
 #		puts "collection size: " + users.size.to_s
 		subscribers_array = []
 		subscribersListStart = '{"batches": [{"subscribers": ['
@@ -40,7 +40,7 @@ module Jobs
 
 			  isInsider = false
 
-			  if group && GroupUser.where(user_id: user.id, group_id: group.id).exists? 
+			  if group && GroupUser.where(user_id: user.id, group_id: group.id).exists?
 			    isInsider = true
 			  else
 			    isInsider = false
@@ -89,11 +89,11 @@ module Jobs
 				bounce_score = results2[0]["bounce_score"]
 				first_post_created_at = results2[0]["first_post_created_at"]
 			end
-			
+
 			  subscriber_hash = {
 				"email":  user_email,
 				"active": user.active.to_s,
-				"user_id": user.id, 
+				"user_id": user.id,
 				"time_zone": "Europe/Copenhagen",
 				"custom_fields": {
 				"insider": isInsider.to_s,
@@ -114,27 +114,27 @@ module Jobs
 				"last_seen_at": user.last_seen_at.to_s
 			     }
 			 }
-				
+
 			# An array of subscribers
 			subscribers_array = subscribers_array.push(subscriber_hash)
-				  
+
 			  #puts subscriberInfo
 
 			 # subscribersListStart = subscribersListStart + subscriberInfo
 
 		end
-		
+
 		#puts "subscribersListStart: " + subscribersListStart
 
 		#subscribers = subscribersListStart.chop + subscribersListEnd #remove trailing ,
 #		puts JSON.parse(subscribers)
-		
+
 		puts "submitting to drip.."
 #		resp = client.create_or_update_subscribers(JSON.parse(subscribers))
 		resp = client.create_or_update_subscribers(subscribers_array)
 		puts resp.inspect
 	end
-	    
+
         puts "import complete"
 
       end

@@ -1,5 +1,5 @@
 module Jobs
-  class UpdateStocks < Jobs::Scheduled
+  class UpdateStocks < ::Jobs::Scheduled
 
   include Sidekiq::Worker
 
@@ -7,22 +7,22 @@ module Jobs
     require "uri"
 
     every 8.minutes
-    
+
     def execute(args)
-      
+
         # find all stocks in tekindex
-          
+
         @tickers = []
 
         # find all favorited stocks
         puts "Finding all favorite stocks"
 
         User.find_each do |user|
-      
+
           puts "finding favorites for user id: #{user.id}"
-          
+
           unless user.custom_fields["favorite_stocks"].nil? || user.custom_fields["favorite_stocks"].empty?
-            
+
             users_favorite_stocks = user.custom_fields["favorite_stocks"].split(',')
             # puts users_favorite_stocks
 
@@ -45,7 +45,7 @@ module Jobs
                     AND key != 'popular_posts'
                 ),
                 data AS(
-                    SELECT  
+                    SELECT
                         value->>'user_id' as user_id,
                         value->>'symbol' as symbol,
                         value->>'timestamp' as timestamp,
@@ -60,23 +60,23 @@ module Jobs
                 where symbol is not null"
 
         trade_symbols = ActiveRecord::Base.connection.execute(sql)
-  
+
         puts "found stocks ever used in trades/portfolio: "
         puts trade_symbols.values
-        
+
         @list_of_strings = []
         trade_symbols.values.each do |trade_symbol|
            @list_of_strings.push(trade_symbol[0]) # adds string in array to list, silly workaround
 #          puts trade_symbol[0]
         end
  #       puts @list_of_strings
-      
+
         unless @list_of_strings.nil?
           # add to array
             @tickers.concat @list_of_strings
         end
 
-         ose_tickers = 
+         ose_tickers =
           ['ASC.OL',
           'AFG.OL',
           'AKVA.OL',
@@ -3781,7 +3781,7 @@ module Jobs
         @tickers.concat oax_tickers # same as above
         @tickers.concat st_tickers ## removed these as we can fetch them from the netfonds/hegn. api below
         # # @tickers.concat ngm_tickers # does not appear to be covered by API
-  
+
 #        @tickers.concat nyse_tickers # removed us stocks as it was leading to way too many stocks to fetch (pricey)
  #       @tickers.concat amex_tickers
   #      @tickers.concat nasdaq_tickers
@@ -3789,7 +3789,7 @@ module Jobs
 
         # remove duplicates
         @tickers = @tickers.uniq
-        
+
         @tickers = @tickers.flatten
         # sort alphabetically
 
@@ -3809,11 +3809,11 @@ module Jobs
 #        import_nasdaq_stocks()
 
         #@tickers = ["nhy.ol", "tsla", "funcom.ol"]
-        
+
         # filter out all scand st tickers so we can fetch them from netfonds/heg instead (remove if switching away from this way of fetching)
 #        @tickers = @tickers.reject {|item| item.include?(".st")}
  #       @tickers = @tickers.reject {|item| item.include?(".ol")}
-      
+
 #        import_st_stocks()
  #       import_ose_stocks()
   #      import_oax_stocks()
@@ -3835,9 +3835,9 @@ module Jobs
          last = line[2].to_f
          change = line[5].to_f
          last_close = line[9].to_f
-         
+
          percent_change = (((last - last_close)/last_close)*100).round(2).to_s + "%"
-         
+
          if last == 0 # if no trades in stock today, last will be 0 and therefore change should be 0 also
           percent_change = 0
           last = last_close # also do this so we have a price to show
@@ -3847,7 +3847,7 @@ module Jobs
          ::PluginStore.set("stock_price", symbol, last.to_s)
          ::PluginStore.set("stock_change_percent", symbol, percent_change.to_s)
          #::PluginStore.set("stock_last_updated", symbol, last_updated) #todo: add
-        
+
        end
       end
 
@@ -3871,20 +3871,20 @@ module Jobs
          last = line[2].to_f
          change = line[5].to_f
          last_close = line[9].to_f
-         
+
          percent_change = (((last - last_close)/last_close)*100).round(2).to_s + "%"
-         
+
          if last == 0 # if no trades in stock today, last will be 0 and therefore change should be 0 also
           percent_change = 0
           last = last_close # also do this so we have a price to show
-         
+
          end
 
          puts symbol + " last: " + last.to_s + " change: " + change.to_s + " yesterday: " + last_close.to_s + " change %: "  + percent_change.to_s
          ::PluginStore.set("stock_price", symbol, last.to_s)
          ::PluginStore.set("stock_change_percent", symbol, percent_change.to_s)
          #::PluginStore.set("stock_last_updated", symbol, last_updated) #todo: add
-        
+
        end
       end
 
@@ -3909,20 +3909,20 @@ module Jobs
          last = line[2].to_f
          change = line[5].to_f
          last_close = line[9].to_f
-         
+
          percent_change = (((last - last_close)/last_close)*100).round(2).to_s + "%"
-         
+
          if last == 0 # if no trades in stock today, last will be 0 and therefore change should be 0 also
           percent_change = 0
           last = last_close # also do this so we have a price to show
-         
+
          end
 
          puts symbol + " last: " + last.to_s + " change: " + change.to_s + " yesterday: " + last_close.to_s + " change %: "  + percent_change.to_s
          ::PluginStore.set("stock_price", symbol, last.to_s)
          ::PluginStore.set("stock_change_percent", symbol, percent_change.to_s)
          #::PluginStore.set("stock_last_updated", symbol, last_updated) #todo: add
-        
+
        end
       end
 
@@ -3946,20 +3946,20 @@ module Jobs
          last = line[2].to_f
          change = line[5].to_f
          last_close = line[9].to_f
-         
+
          percent_change = (((last - last_close)/last_close)*100).round(2).to_s + "%"
-         
+
          if last == 0 # if no trades in stock today, last will be 0 and therefore change should be 0 also
           percent_change = 0
           last = last_close # also do this so we have a price to show
-         
+
          end
 
          puts symbol + " last: " + last.to_s + " change: " + change.to_s + " yesterday: " + last_close.to_s + " change %: "  + percent_change.to_s
          ::PluginStore.set("stock_price", symbol, last.to_s)
          ::PluginStore.set("stock_change_percent", symbol, percent_change.to_s)
          #::PluginStore.set("stock_last_updated", symbol, last_updated) #todo: add
-        
+
        end
       end
 
@@ -3970,7 +3970,7 @@ module Jobs
       puts "Done!"
 
     end
-    
+
 def import_nyse_stocks ()
 
       def read(url)
@@ -3980,20 +3980,20 @@ def import_nyse_stocks ()
          last = line[2].to_f
          change = line[5].to_f
          last_close = line[9].to_f
-         
+
          percent_change = (((last - last_close)/last_close)*100).round(2).to_s + "%"
-         
+
          if last == 0 # if no trades in stock today, last will be 0 and therefore change should be 0 also
           percent_change = 0
           last = last_close # also do this so we have a price to show
-         
+
          end
 
          puts symbol + " last: " + last.to_s + " change: " + change.to_s + " yesterday: " + last_close.to_s + " change %: "  + percent_change.to_s
          ::PluginStore.set("stock_price", symbol, last.to_s)
          ::PluginStore.set("stock_change_percent", symbol, percent_change.to_s)
          #::PluginStore.set("stock_last_updated", symbol, last_updated) #todo: add
-        
+
        end
       end
 
@@ -4004,7 +4004,7 @@ def import_nyse_stocks ()
       puts "Done!"
 
     end
-    
+
 def import_amex_stocks ()
 
       def read(url)
@@ -4014,20 +4014,20 @@ def import_amex_stocks ()
          last = line[2].to_f
          change = line[5].to_f
          last_close = line[9].to_f
-         
+
          percent_change = (((last - last_close)/last_close)*100).round(2).to_s + "%"
-         
+
          if last == 0 # if no trades in stock today, last will be 0 and therefore change should be 0 also
           percent_change = 0
           last = last_close # also do this so we have a price to show
-         
+
          end
 
          puts symbol + " last: " + last.to_s + " change: " + change.to_s + " yesterday: " + last_close.to_s + " change %: "  + percent_change.to_s
          ::PluginStore.set("stock_price", symbol, last.to_s)
          ::PluginStore.set("stock_change_percent", symbol, percent_change.to_s)
          #::PluginStore.set("stock_last_updated", symbol, last_updated) #todo: add
-        
+
        end
       end
 
@@ -4038,7 +4038,7 @@ def import_amex_stocks ()
       puts "Done!"
 
     end
-    
+
 def import_nasdaq_stocks ()
 
       def read(url)
@@ -4048,20 +4048,20 @@ def import_nasdaq_stocks ()
          last = line[2].to_f
          change = line[5].to_f
          last_close = line[9].to_f
-         
+
          percent_change = (((last - last_close)/last_close)*100).round(2).to_s + "%"
-         
+
          if last == 0 # if no trades in stock today, last will be 0 and therefore change should be 0 also
           percent_change = 0
           last = last_close # also do this so we have a price to show
-         
+
          end
 
          puts symbol + " last: " + last.to_s + " change: " + change.to_s + " yesterday: " + last_close.to_s + " change %: "  + percent_change.to_s
          ::PluginStore.set("stock_price", symbol, last.to_s)
          ::PluginStore.set("stock_change_percent", symbol, percent_change.to_s)
          #::PluginStore.set("stock_last_updated", symbol, last_updated) #todo: add
-        
+
        end
       end
 
@@ -4071,11 +4071,11 @@ def import_nasdaq_stocks ()
 
       puts "Done!"
 
-    end   
+    end
     def set_stock_data (tickers)
 
       # handles multiple stocks in one request
-        if !tickers.nil? 
+        if !tickers.nil?
 
           tickers = tickers.uniq
           to_be_processed = []
@@ -4086,13 +4086,13 @@ def import_nasdaq_stocks ()
             if ![".ol", ".OL", ".oax", ".OAX", ".ST", ".st"].any? { |word| stock.include?(word) }
                 to_be_processed.push(stock)
             end
-            
+
           end
 
           tickers = to_be_processed
 
           puts "Fetching stock data for #{tickers.size} stocks: #{tickers}"
-        
+
           #tickers = ["aapl", "aga.ol", "akso.ol", "amd", "apcl.ol", "asetek.ol", "avm.ol", "axa.ol", "bionor.ol", "biotec.ol", "bird.ol", "bitcoin-xbt.st", "btcusd=x", "dno.ol", "fro.ol", "funcom.ol", "gig.ol", "hugo.ol", "idex.ol", "iox.ol", "kit.ol", "nano.ol", "nas.ol", "natto.ol", "natto.st", "nel.ol", "next.ol", "nod.ol", "nom.ol", "nor.ol", "ocy.ol", "opera.ol", "ork.ol", "pho.ol", "seam.st", "sf.st", "star-a.st", "star-b.st", "tel.ol", "thin.ol", "til.ol"]
 
           #stocks = StockQuote::Stock.quote(tickers) #old unreliable method, but ok for historical data
@@ -4102,18 +4102,18 @@ def import_nasdaq_stocks ()
           ticker_batches = tickers.each_slice(1).to_a
 
           ticker_batches.each_with_index do | ticker_batch, batch_index |
-              
+
               #sleep(1 * (1 + batch_index)) # add a 5 second delay between fetching stock data to not get blocked by yahoo
 
 
               tickers = ticker_batch.compact.join(",") #compact removes nil values
 
               #source = 'http://finance.yahoo.com/webservice/v1/symbols/' + tickers + '/quote?format=json&view=detail' #old way
-              
+
               source = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20csv%20where%20url%3D'http%3A%2F%2Fdownload.finance.yahoo.com%2Fd%2Fquotes.csv%3Fs%3D" + tickers + "%26f%3Dsl1d1t1c1p2ohgvt1d1%26e%3D.csv'%20and%20columns%3D'symbol%2Cprice%2Cdate%2Ctime%2Cchange%2Cchg_percent%2Ccol1%2Chigh%2Clow%2Ccol2%2Clast_trade_time%2Clast_trade_date'&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback="
               #source = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20csv%20where%20url%3D%27http%3A%2F%2Fdownload.finance.yahoo.com%2Fd%2Fquotes.csv%3Fs%3D" + tickers + "%26f%3Dsl1d1t1c1p2ohgv%26e%3D.csv%27%20and%20columns%3D%27symbol%2Cprice%2Cdate%2Ctime%2Cchange%2Cchg_percent%2Ccol1%2Chigh%2Clow%2Ccol2%27&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback="
               puts source
-              
+
              # conn = Faraday.new(:url => 'https://query.yahooapis.com') do |faraday|
               #  faraday.request  :url_encoded             # form-encode POST params
                # faraday.response :logger                  # log requests to STDOUT
@@ -4143,7 +4143,7 @@ def import_nasdaq_stocks ()
               # end
 
               resp = Net::HTTP.get_response(URI.parse(source))
-              
+
               puts "code: "
               puts resp.code
 
@@ -4158,9 +4158,9 @@ def import_nasdaq_stocks ()
                 puts result
 
                 #stocks = result["list"]["resources"] #old way
-                
+
                 if !result["query"].nil? && !result["query"]["results"].nil? && !result["query"]["results"]["row"].nil?
-                
+
                   stocks = result["query"]["results"]["row"]
 
                   puts "processing.."
@@ -4174,9 +4174,9 @@ def import_nasdaq_stocks ()
                     puts "-- Processing: #{index} in batch #{batch_index}"
 
                     if result["query"]["count"] > 1
-                      symbol = result["query"]["results"]["row"][index]["symbol"].downcase 
+                      symbol = result["query"]["results"]["row"][index]["symbol"].downcase
                     else
-                      symbol = result["query"]["results"]["row"]["symbol"].downcase 
+                      symbol = result["query"]["results"]["row"]["symbol"].downcase
                     end
 
                     #symbol = result["list"]["resources"][index]["resource"]["fields"]["symbol"].downcase # old way
@@ -4191,12 +4191,12 @@ def import_nasdaq_stocks ()
                         price = result["query"]["results"]["row"]["price"]
                       end
 
-                      if price == "N/A" 
+                      if price == "N/A"
                         price = "0" # something the numberanimator can handle
                       end
 
                       #last_updated = result["query"]["results"]["row"][index]["utctime"]
-                      
+
                       if result["query"]["count"] > 1
                         change_percent = result["query"]["results"]["row"][index]["chg_percent"]
                       else
@@ -4208,15 +4208,15 @@ def import_nasdaq_stocks ()
                       ::PluginStore.set("stock_price", symbol, price)
                       ::PluginStore.set("stock_change_percent", symbol, change_percent)
                       #::PluginStore.set("stock_last_updated", symbol, last_updated)
-                      
-                    end 
+
+                    end
 
                   #puts "#{stocks[index].to_json}"
                 end
               end
-            
+
             end
-        
+
 
           end
 
@@ -4225,9 +4225,9 @@ def import_nasdaq_stocks ()
         end
 
     end
-    
+
     def import_ob_stocks_from_euronext
-     
+
       isins = [["2020","BMG9156K1018"],
       ["HUGO","DK0060945467"],
       ["AASB","NO0010672181"],
@@ -4508,7 +4508,7 @@ def import_nasdaq_stocks ()
       ["ZAP","NO0010713936"],
       ["ZENA","CA98936C1068"],
       ["ZWIPE","NO0010721277"],
-      ["AASB-ME","NO0010672181"], # old tickers from here on but with new tickers so we get data 
+      ["AASB-ME","NO0010672181"], # old tickers from here on but with new tickers so we get data
       ["ACC-ME","NO0010890304"],
       ["ADSC-ME","CY0108052115"],
       ["AGLX-ME","NO0010872468"],
@@ -4634,14 +4634,14 @@ def import_nasdaq_stocks ()
           end
 
     end
-    
+
     def import_all_stocks_from_rapidapi(tickers)
 
       tickers_to_import = tickers
 
       # handles multiple stocks in one request
       puts "starting"
-        if !tickers_to_import.nil? 
+        if !tickers_to_import.nil?
           puts "2"
 
           tickers_to_import = tickers_to_import.uniq
@@ -4655,13 +4655,13 @@ def import_nasdaq_stocks ()
            # if ![".ol", ".OL", ".oax", ".OAX", ".ST", ".st"].any? { |word| stock.include?(word) }
              #   to_be_processed.push(stock)
             #end
-            
+
           #end
 
           #tickers = to_be_processed
 
           puts "Fetching stock data for #{tickers_to_import.size} stocks: #{tickers_to_import}"
-        
+
           #tickers = ["aapl", "aga.ol", "akso.ol", "amd", "apcl.ol", "asetek.ol", "avm.ol", "axa.ol", "bionor.ol", "biotec.ol", "bird.ol", "bitcoin-xbt.st", "btcusd=x", "dno.ol", "fro.ol", "funcom.ol", "gig.ol", "hugo.ol", "idex.ol", "iox.ol", "kit.ol", "nano.ol", "nas.ol", "natto.ol", "natto.st", "nel.ol", "next.ol", "nod.ol", "nom.ol", "nor.ol", "ocy.ol", "opera.ol", "ork.ol", "pho.ol", "seam.st", "sf.st", "star-a.st", "star-b.st", "tel.ol", "thin.ol", "til.ol"]
 
           #stocks = StockQuote::Stock.quote(tickers) #old unreliable method, but ok for historical data
@@ -4671,7 +4671,7 @@ def import_nasdaq_stocks ()
           ticker_batches = tickers_to_import.each_slice(50).to_a # doesn't work well after 80 at a time
 
           ticker_batches.each_with_index do | ticker_batch, batch_index |
-              
+
               #sleep(1 * (1 + batch_index)) # add a 5 second delay between fetching stock data to not get blocked by yahoo
 
               tickers = ticker_batch.compact.join(",") #compact removes nil values
@@ -4694,13 +4694,13 @@ def import_nasdaq_stocks ()
                 #stocks = result["list"]["resources"] #old way
 
                 result = JSON.parse(result.body)
-                
+
                 if !result.nil? && !result["quoteResponse"].nil? && !result["quoteResponse"]["result"].nil?
-                
+
                   stocks = result["quoteResponse"]["result"]
 
                   puts "processing.."
-                  puts stocks.count                  
+                  puts stocks.count
                   puts "stocks"
 
                   #puts stocks
@@ -4712,9 +4712,9 @@ def import_nasdaq_stocks ()
                     #puts stock["symbol"]
 
                     #if result["quoteResponse"]["count"] > 1
-                     # symbol = result["query"]["results"]["row"][index]["symbol"].downcase 
+                     # symbol = result["query"]["results"]["row"][index]["symbol"].downcase
                     #else
-                     # symbol = result["query"]["results"]["row"]["symbol"].downcase 
+                     # symbol = result["query"]["results"]["row"]["symbol"].downcase
                     #end
 
                     symbol = stock["symbol"].downcase
@@ -4727,8 +4727,8 @@ def import_nasdaq_stocks ()
 
                       price = stock["regularMarketPrice"]
                       last_updated = stock["regularMarketTime"]
-                     
-                      if price == "N/A" 
+
+                      if price == "N/A"
                         price = "0" # something the numberanimator can handle
                       end
 
@@ -4739,21 +4739,21 @@ def import_nasdaq_stocks ()
                         change_percent = stock["regularMarketChangePercent"].round(2).to_s + "%"
                       end
 #                      change_percent = (change_percent.to_f * 100) + "%"
-                      
+
                       puts "#{symbol} / #{price} / #{change_percent}"
 
                       ::PluginStore.set("stock_price", symbol, price)
                       ::PluginStore.set("stock_change_percent", symbol, change_percent)
                       ::PluginStore.set("stock_last_updated", symbol, last_updated)
-                      
-                    end 
+
+                    end
 
                   #puts "#{stocks[index].to_json}"
                 end
               end
-            
+
            # end
-        
+
           end
 
           puts "Done!"

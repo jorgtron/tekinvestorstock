@@ -1,19 +1,19 @@
 module Jobs
-  class UpdateCryptocurrencies < Jobs::Scheduled
+  class UpdateCryptocurrencies < ::Jobs::Scheduled
 
   	include Sidekiq::Worker
 
     every 10.minutes
 
     def execute(args)
-	     
+
       # find all cryptocurrencies (at the moment, yahoo finance lookup api does not have all of the ccs that cryptonator has prices for, but we store all the prices from cryptonator)
 
       source = "https://api.coinmarketcap.com/v1/ticker/?limit=0"
       puts source
-      
+
       resp = Net::HTTP.get_response(URI.parse(source))
-      
+
       puts "code: "
       puts resp.code
 
@@ -48,13 +48,13 @@ module Jobs
             puts "storing: #{ticker}-usd & #{ticker}-btc / #{price} / #{change_percent}"
 
             # store USD prices
-            
+
             ::PluginStore.set("stock_price", ticker.downcase + "-usd", price.to_s)
-            ::PluginStore.set("stock_change_percent", ticker.downcase + "-usd", change_percent.to_s) 
+            ::PluginStore.set("stock_change_percent", ticker.downcase + "-usd", change_percent.to_s)
             ::PluginStore.set("stock_last_updated", ticker.downcase + "-usd", last_updated.to_s)
 
             ::PluginStore.set("stock_price", ticker.downcase + "-btc", price_btc.to_s)
-            ::PluginStore.set("stock_change_percent", ticker.downcase + "-btc", change_percent.to_s) 
+            ::PluginStore.set("stock_change_percent", ticker.downcase + "-btc", change_percent.to_s)
             ::PluginStore.set("stock_last_updated", ticker.downcase + "-btc", last_updated.to_s)
 
             #puts "stored data"
