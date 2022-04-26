@@ -315,34 +315,10 @@ after_initialize do
 
 #            puts data
 
-            # generate token
-
-              url = URI.parse('https://api.iflychat.com/api/1.1/token/generate')
-              http = Net::HTTP.new(url.host, url.port)
-              http.use_ssl = true
-
-              request = Net::HTTP::Post.new(url, {'Content-Type' => 'application/json'})
-              request.set_form_data(data)
-
-              response = http.request(request)
-
-              # assign token to user
-              unless response.body == nil
-#                puts response.body
-                hash = JSON.parse response.body
-
-                unless hash["key"] == nil || hash["key"] == ""
-#                  puts "assigning token " + hash["key"]
-                  current_user.custom_fields["iflychat_token"] = hash["key"]
-                  current_user.save
-                end
-              end
-
-              chat_token = nil
-              chat_token = current_user.custom_fields["iflychat_token"]
 
 
-            render json: { insider: true, chat_token: chat_token, email: userEmail, username: username, userid: userID }
+
+            render json: { insider: true, email: userEmail, username: username, userid: userID }
           else
             render json: { insider: false, email: userEmail, username: username, userid: userID }
           end
