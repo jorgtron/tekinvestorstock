@@ -5,7 +5,7 @@ ga('create', 'UA-61110015-1', 'auto');
 /*
  * easy-autocomplete
  * jQuery plugin for autocompletion
- * 
+ *
  * @author Łukasz Pawełczak (http://github.com/pawelczak)
  * @version 1.3.3
  * Copyright MIT License: https://github.com/pawelczak/easy-autocomplete/blob/master/LICENSE.txt
@@ -19,45 +19,45 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
       if($('li.current-user').length > 0 ) { loggedIn = true; } else { loggedIn = false;  }
       if($('#home-page').length > 0 && $('#col-2').length > 0) { homePage = true; } else { homePage = false; }
       if($('.stock-chart').length > 0 ) { stockPage = true; } else { stockPage = false; }
-      
+
       if(homePage){
-        
-        if(loggedIn){ 
-          displayUsersFavoriteStocks(false); 
-          checkIfUserIsInsider(); 
+
+        if(loggedIn){
+          displayUsersFavoriteStocks(false);
+          checkIfUserIsInsider();
           initSearchField();
 
         }
 
         displayTekIndex(false);
-        console.log('refreshing stocks'); 
+        console.log('refreshing stocks');
       }
 
-      // add notice in fav stocks box if not signed in       
+      // add notice in fav stocks box if not signed in
       if(!loggedIn && homePage) {
         $('#insider-cta').hide();
         $('#user-favorite-stocks .spinner').hide();
         $('#user-favorite-stocks .notice-not-logged-in').show();
         $('#tekindex .spinner').hide();
       }
-      
+
       // run check every X ms to see if page has changed, if page has changed and new page is home page, refresh stock list
       oldTopicsCount=$('.topic-list tr').length;
       $(function() {
           setInterval(function() {
               if($('.topic-list tr').length!=oldTopicsCount) {
-                   if(loggedIn){ displayUsersFavoriteStocks(true); checkIfUserIsInsider(); initSearchField(); } 
+                   if(loggedIn){ displayUsersFavoriteStocks(true); checkIfUserIsInsider(); initSearchField(); }
                    displayTekIndex(true);
                    console.log('page changed, updating stocks');
-                  
-                  // add notice in fav stocks box if not signed in       
+
+                  // add notice in fav stocks box if not signed in
                   if(!loggedIn && homePage) {
                     $('#insider-cta').hide();
                     $('#user-favorite-stocks .spinner').hide();
                     $('#user-favorite-stocks .notice-not-logged-in').show();
                     $('#tekindex .spinner').hide();
                     $('#tekindex .notice-not-logged-in').show();
-                    
+
 
                   }
 
@@ -84,20 +84,20 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
                           client_id: 'tradingview.com',
                           user_id: 'public_user_id'
                         });
-                      });  
+                      });
                    }
-                       
+
                    oldTopicsCount=$('.topic-list tr').length;
-              } 
+              }
           },500);
       });
 
   }, 500);
 
     setInterval(function(){
-      
+
       if(homePage){
-        
+
         if(loggedIn){ displayUsersFavoriteStocks(true); }
 
         displayTekIndex(true);
@@ -108,7 +108,7 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
 
   function checkIfUserIsInsider(){
       console.log('checkIfUserIsInsider');
-      
+
       Discourse.ajax("/stock/is_user_insider", {
           type: "GET",
         }).then(function(data) {
@@ -121,9 +121,9 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
             console.log("insider:false");
             $('#insider-cta').show();
           }
-          
 
-        });        
+
+        });
   }
 
   function displayUsersFavoriteStocks(forceRefresh) {
@@ -134,7 +134,7 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
         Discourse.ajax("/stock/get_users_favorite_stocks", {
           type: "GET",
         }).then(function(data) {
-          
+
           //data = JSON.parse(data);
           //console.log('users fav stocks: ');
           //console.log(data.stock);
@@ -144,17 +144,17 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
           //console.log(data[0].length);
 
           $('#user-favorite-stocks .spinner').hide();
-          if(data.stock.length > 0) { $('#user-favorite-stocks').append(stock_html); $('.easy-autocomplete').css('opacity', 1); } 
+          if(data.stock.length > 0) { $('#user-favorite-stocks').append(stock_html); $('.easy-autocomplete').css('opacity', 1); }
             else { $('#user-favorite-stocks .notice-no-favorites').show(); $('.easy-autocomplete').css('opacity', 1); }
-          
+
           $('#user-favorite-stocks .number-animate').numberAnimate('init');
 
-          
+
         });
-      
+
   }
 
-  
+
 
   function displayTekIndex(forceRefresh) {
         console.log('displayTekIndex');
@@ -169,14 +169,14 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
 
           //console.log(data[0].length);
           //console.log(stock_html);
-          
+
           stock_html = generateStockTable(data, "tekindex_stock_data", forceRefresh);
 
           $('#tekindex .spinner').hide();
-          $('#tekindex').append(stock_html);              
-          
+          $('#tekindex').append(stock_html);
+
           $('#tekindex .number-animate').numberAnimate('init');
-          
+
 
         });
 
@@ -186,11 +186,11 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
 
         template = '';
         //console.log(data.stock);
-      
+
         for (var i = data.stock.length - 1; i >= 0; i--) {
-          
+
           //console.log('stock #' + i);
-          
+
           //console.log(data.stock[i]);
 
           stock = data.stock[i];
@@ -203,7 +203,7 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
           last_updated = data.stock[i].stock[3];
 
           if(price != null) {
-            
+
             price = formatNumber(price);
 
             price = price.toString().replace(".",",");
@@ -213,17 +213,17 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
 
             percent_change = formatNumber(percent_change);
             percent_change = percent_change.replace(".",",");
-            
+
             change_direction = 'neutral';
             //console.log(percent_change);
             if(percent_change.indexOf("-") != -1){ change_direction = 'negative'; } else { change_direction = 'positive'; }
-            
+
             if($("#" + divID).length == 0 || forceRefresh) { // stock data has not already been loaded
               template = template + '<tr data-symbol="' + ticker + '"><td class="td-ticker"><a href="/tags/' + ticker.toLowerCase().replace(".","_") + '"><span class="stock_symbol">' + ticker.toUpperCase() + '</span></a></td><td class="td-last"><span class="stock_last number-animate">' + price + '</span></td><td class="td-change"><span class="stock_change_percent ' + change_direction + '"><span class="number-animate">' + percent_change + '</span>%</span></td><td class="td-stock-unfavorite" onclick="removeStockFromUsersFavoriteStocks(&quot;' + ticker.toLowerCase() + '&quot;);"><span>&CircleMinus;</span></td></tr>';
             }
 
             if($("#" + divID).length > 0 && forceRefresh == false) { // stock data has been loaded, update existing stock numbers
-              
+
                 // update data
                 //console.log('updating ' + divID + ticker + ' data to: ' + price + ', ' + percent_change + ' ' + ticker + ', ' + price);
                 //console.log('here');
@@ -243,7 +243,7 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
         };
 
         if($("#" + divID).length == 0 || forceRefresh) { // stock data has not already been loaded
-          
+
           if(forceRefresh) {
             $("#" + divID).remove();
             //console.log('removing stock data');
@@ -254,11 +254,11 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
           return stock_html;
         }
 
-    
+
   }
 
   function addStockToUsersFavoriteStocks(ticker) {
-        
+
         // add to fav list UI before it has actually been added
 
         prepend_row = '<tr data-symbol="' + ticker.toLowerCase() + '"><td class="td-ticker"><a href="/tags/' + ticker.toLowerCase().replace(".","_") + '"><span class="stock_symbol">' + ticker.toUpperCase() + '</span></a></td><td class="td-last"><span class="stock_last number-animate"><div class="spinner spinner-mini"></div></span></td><td class="td-change"><span class="stock_change_percent"><span class="number-animate"><div class="spinner spinner-mini"></div></span></span></td><td class="td-stock-unfavorite"><span></span></td></tr>';
@@ -275,7 +275,7 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
     }
 
   function removeStockFromUsersFavoriteStocks(ticker) {
-        
+
         $("#stock_data #stock_data_inner tbody [data-symbol='" + ticker + "']").remove();
 
         Discourse.ajax("/stock/remove_stock_from_users_favorite_stocks?ticker=" + ticker.toLowerCase(), {
@@ -304,13 +304,13 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
 
       });
     }
-    
+
     function openSignupModal() {
       $('.btn.sign-up-btn').trigger("click");
       console.log('trigger');
       return false;
     }
-  
+
     function openLoginModal() {
       $('.btn.login-btn').trigger("click");
       console.log('trigger');
@@ -318,7 +318,7 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
     }
 
     function initSearchField() {
-        
+
         var options = {
             url: function(phrase) {
               return "/stock/symbol_search?ticker=" + phrase;
@@ -343,8 +343,8 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
                 addStockToUsersFavoriteStocks(value);
                 $('#stock-search').val('');
 
-              } 
-              
+              }
+
             }
           };
 
@@ -357,3 +357,12 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
         //console.log('formatting number to: ' + parseFloat(number).toFixed(2));
         return parseFloat(number).toFixed(2);
     }
+
+
+// Required for Discourse 2.9.x
+export default {
+  name: "extend-for-tekinvestorstock",
+  initialize() {
+
+  }
+};
