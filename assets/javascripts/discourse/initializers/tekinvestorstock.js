@@ -16,6 +16,8 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
   setTimeout(function(){
 
       let loggedIn;
+      let homePage;
+      let stockPage;
 
       if($('li.current-user').length > 0 && $('li.current-user').html().indexOf('pdx') != -1) { loggedIn = true; } else { loggedIn = false;  }
       if($('li.current-user').length > 0 ) { loggedIn = true; } else { loggedIn = false;  }
