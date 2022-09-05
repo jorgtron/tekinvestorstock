@@ -15,7 +15,7 @@ var EasyAutocomplete=function(a){return a.Configuration=function(a){function b()
 
   setTimeout(function(){
 
-      //if($('li.current-user').length > 0 && $('li.current-user').html().indexOf('pdx') != -1) { loggedIn = true; } else { loggedIn = false;  }
+      if($('li.current-user').length > 0 && $('li.current-user').html().indexOf('pdx') != -1) { loggedIn = true; } else { loggedIn = false;  }
       if($('li.current-user').length > 0 ) { loggedIn = true; } else { loggedIn = false;  }
       if($('#home-page').length > 0 && $('#col-2').length > 0) { homePage = true; } else { homePage = false; }
       if($('.stock-chart').length > 0 ) { stockPage = true; } else { stockPage = false; }
